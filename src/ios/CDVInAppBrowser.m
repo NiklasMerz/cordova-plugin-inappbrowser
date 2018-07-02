@@ -24,6 +24,14 @@
 #import <Cordova/CDVPluginResult.h>
 
 
+#pragma mark CDVWindow
+
+@interface CDVWindowForInAppBrowser : UIWindow
+@end
+
+@implementation CDVWindowForInAppBrowser()
+@end
+
 #pragma mark CDVInAppBrowser
 
 @implementation CDVInAppBrowser
@@ -54,6 +62,30 @@
     }else{
         [[CDVUIInAppBrowser getInstance] open:command];
     }
+
+    _previousStatusBarStyle = [UIApplication sharedApplication].statusBarStyle;
+
+    __block CDVInAppBrowserNavigationController* nav = [[CDVInAppBrowserNavigationController alloc]
+                                   initWithRootViewController:self.inAppBrowserViewController];
+    nav.orientationDelegate = self.inAppBrowserViewController;
+    nav.navigationBarHidden = YES;
+    nav.modalPresentationStyle = self.inAppBrowserViewController.modalPresentationStyle;
+
+    __weak CDVInAppBrowser* weakSelf = self;
+
+    // Run later to avoid the "took a long time" log message.
+    dispatch_async(dispatch_get_main_queue(), ^{
+        if (weakSelf.inAppBrowserViewController != nil) {
+            CGRect frame = [[UIScreen mainScreen] bounds];
+            UIWindow *tmpWindow = [[CDVWindowForInAppBrowser alloc] initWithFrame:frame];
+            UIViewController *tmpController = [[UIViewController alloc] init];
+            [tmpWindow setRootViewController:tmpController];
+            [tmpWindow setWindowLevel:UIWindowLevelNormal];
+
+            [tmpWindow makeKeyAndVisible];
+            [tmpController presentViewController:nav animated:YES completion:nil];
+        }
+    });
 }
 
 - (void)close:(CDVInvokedUrlCommand*)command
