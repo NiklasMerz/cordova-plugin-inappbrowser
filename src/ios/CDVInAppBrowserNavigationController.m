@@ -19,7 +19,6 @@
 
 #import "CDVInAppBrowserNavigationController.h"
 
-#define    STATUSBAR_WITH_NOTCH_HEIGHT 44.0
 #define    STATUSBAR_HEIGHT 20.0
 
 @implementation CDVInAppBrowserNavigationController : UINavigationController
@@ -30,22 +29,10 @@
     }
 }
 
-- (BOOL)hasTopNotch {
-    if (@available(iOS 11.0, *)) {
-        return [[[UIApplication sharedApplication] delegate] window].safeAreaInsets.top > 20.0;
-    }
-    
-    return  NO;
-}
-
 - (void) viewDidLoad {
 
     CGRect statusBarFrame = [self invertFrameIfNeeded:[UIApplication sharedApplication].statusBarFrame];
-    if([self hasTopNotch]){
-        statusBarFrame.size.height = STATUSBAR_WITH_NOTCH_HEIGHT;
-    }else{
-        statusBarFrame.size.height = STATUSBAR_HEIGHT;
-    }
+    statusBarFrame.size.height = STATUSBAR_HEIGHT;
     // simplified from: http://stackoverflow.com/a/25669695/219684
 
     UIToolbar* bgToolbar = [[UIToolbar alloc] initWithFrame:statusBarFrame];
